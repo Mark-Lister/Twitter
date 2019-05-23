@@ -1,56 +1,90 @@
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <!DOCTYPE HTML>
 <html>
 <head>
+
 <script>
+let tweetCounts = [];
+let dates = [];
+let lastData = [];
+
+
+var socket = io.connect('http://localhost:3000');
 window.onload = function () {
+		var ctx = document.getElementById('myChart').getContext('2d');
+		var myChart = new Chart(ctx, {
+	    type: 'line',
+	    data: {
+	        labels: dates,
+	        datasets: [{
+	            label: '# of Tweets',
+	            data: tweetCounts,
+	            backgroundColor: [
+	                'rgba(255, 99, 132, 0.2)',
+	                'rgba(54, 162, 235, 0.2)',
+	                'rgba(255, 206, 86, 0.2)',
+	                'rgba(75, 192, 192, 0.2)',
+	                'rgba(153, 102, 255, 0.2)',
+	                'rgba(255, 159, 64, 0.2)'
+	            ],
+	            borderColor: [
+	                'rgba(255, 99, 132, 1)',
+	                'rgba(54, 162, 235, 1)',
+	                'rgba(255, 206, 86, 1)',
+	                'rgba(75, 192, 192, 1)',
+	                'rgba(153, 102, 255, 1)',
+	                'rgba(255, 159, 64, 1)'
+	            ],
+	            borderWidth: 1
+	        }]
+	    },
+	    options: {
+	        scales: {
 
-var dps = []; // dataPoints
-var chart = new CanvasJS.Chart("chartContainer", {
-	title :{
-		text: "Dynamic Data"
-	},
-	axisY: {
-		includeZero: false
-	},      
-	data: [{
-		type: "line",
-		dataPoints: dps
-	}]
-});
+	            yAxes: [{
+	                ticks: {
+	                    beginAtZero: true
+	                }
+	            }]
 
-var xVal = 0;
-var yVal = 100; 
-var updateInterval = 1000;
-var dataLength = 20; // number of dataPoints visible at any point
 
-var updateChart = function (count) {
+	        }
+	    }
+	});
 
-	count = count || 1;
+		function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });
+    chart.update();
+}
 
-	for (var j = 0; j < count; j++) {
-		yVal = yVal +  Math.round(5 + Math.random() *(-5-5));
-		dps.push({
-			x: xVal,
-			y: yVal
-		});
-		xVal++;
-	}
+	socket.on('chat', function (data) {
+		addData(myChart, data[data.length - 1].date, data[data.length - 1].tweets);
 
-	if (dps.length > dataLength) {
-		dps.shift();
-	}
-
-	chart.render();
-};
-
-updateChart(dataLength);
-setInterval(function(){updateChart()}, updateInterval);
+	});
 
 }
+
+
+
+socket.on('chat', function (data) {
+	console.log(data);
+	for (i in data) {
+		dates.push(data[i].date);
+		tweetCounts.push(data[i].tweets);
+	}
+});
+
 </script>
 </head>
 <body>
-<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+<div style="width:75%;">
+		<canvas id="myChart"></canvas>
+	</div>
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </body>
 </html>

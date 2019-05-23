@@ -4,13 +4,16 @@
   "description": "twitter streaming",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mark Lister",
   "license": "ISC",
   "dependencies": {
+    "chart.js": "^2.8.0",
     "express": "^4.17.0",
     "mysql": "^2.17.1",
+    "socket.io": "^2.2.0",
     "twit": "^2.2.11"
   }
 }
